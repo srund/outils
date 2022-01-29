@@ -1,0 +1,2 @@
+tests/testdirs/core/addons/module1
+tests/testdirs/core/addons/module2

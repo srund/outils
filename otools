@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jan  8 22:39:22 2022
+
+Main entry-point for otools from a shell
+
+@author: Simon Rundstedt
+"""
+#%%
+
+import os
+
+import click
+
+import odootools as ot
+
+#%%
+@click.command()
+@click.option("-f","--fullpath",help="Print full path of found modules", is_flag=True, default=False)
+def listmodules(**kwargs):
+    mhandle = ot.base.OdooToolsHandle()
+    result = ot.modules.listmodules(mhandle)
+    if not kwargs["fullpath"]:
+        result = [ os.basename(r) for r in result]
+        result.sort()
+    for r in result:
+        click.echo(r)
+
+#%%
+@click.command()
+@click.option("--hello-world/--no-hello-world", default=False) # - is _ in key
+def main(**kwargs):
+    '''
+    Parameters
+    ----------
+    **kwargs : dict
+        keyword arguments
+
+    Returns
+    -------
+    None.
+    '''
+    if kwargs.get("hello_world") :
+        click.echo("Hello World!")
+
+
+#%%
+if __name__ == "__main__":
+    #ot.client.main()'
+    listmodules()

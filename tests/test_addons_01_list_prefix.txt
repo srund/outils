@@ -1,0 +1,4 @@
+tests/testdirs/addons1/odooext-project
+tests/testdirs/addons1/odoo-project
+tests/testdirs/addons2/odooext-project
+tests/testdirs/addons2/odoo-project
