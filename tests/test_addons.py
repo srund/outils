@@ -56,6 +56,20 @@ class TestFindAddons(unittest.TestCase):
         flines.sort()
         self.assertListEqual(flines,tlines)
 
+    def test_list_empty_prefix(self):
+        '''
+        '''
+        self.handle.addonsprefixes = ['']
+        with open(os.path.join(TESTDIR,"test_addons_02_list_no_prefix.txt")) as tfile:
+            tlines = tfile.read().split('\n')
+            tlines.sort()
+            tlines = list(filter(None,tlines))
+            #testdirs = os.path.join(TESTDIR,'testdirs')
+            #tlines = [ testdirs+t for t in tlines ]
+        flines = addons.listaddons(self.handle)
+        flines.sort()
+        self.assertListEqual(tlines, flines)
+
     def test_list_no_found(self):
         '''
         Test making sure the tests work.
