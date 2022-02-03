@@ -162,15 +162,25 @@ class TestFindModules(unittest.TestCase):
         path = "tests/testmanifests/manifest_03_notdict.py"
         self.assertRaises(TypeError, modules.loadmanifest, path)
 
-    # def test_modulesdependencies_exists(self):
-    #     '''
-    #     '''
-    #     raise NotImplementedError()
-    #
-    # def test_modulesdependencies_empty(self):
-    #     '''
-    #     '''
-    #     raise NotImplementedError()
+    def test_modulesdependencies_exists(self):
+        '''
+        '''
+        path = "tests/graphmanifests/a"
+        ret = modules.moduledependencies(path)
+        self.assertListEqual(["base"], ret)
+        path = "tests/graphmanifests/c"
+        ret = modules.moduledependencies(path)
+        self.assertListEqual(["b","a"], ret)
+
+    def test_modulesdependencies_empty(self):
+        '''
+        '''
+        path = "tests/graphmanifests/d-no-dependency"
+        ret = modules.moduledependencies(path)
+        self.assertListEqual([], ret)
+        path = "tests/graphmanifests/e-no-depends-key"
+        ret = modules.moduledependencies(path)
+        self.assertListEqual([], ret)
 
     # def test_dependency_dictgraph_known(self):
     #     '''

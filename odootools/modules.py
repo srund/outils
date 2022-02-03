@@ -53,22 +53,22 @@ def dirismodule(dirname):
     # return any((os.path.exists(os.path.join(dirname + X) for X in ("__manifest__.py","__openerp__.py")))
     return os.path.exists(os.path.join(dirname, "__manifest__.py"))
 
-# def moduledependencies(path):
-#     '''
-#     Return dependencies of the module in path.
-#
-#     Parameters
-#     ==========
-#     path : str
-#         Path of module.
-#
-#     Returns
-#     =======
-#     dict :
-#         The manifest dictionary.
-#     '''
-#     manifest = loadmanifest(os.path.join(path,"__manifest__.py")) # TODO: Add for __openerp__ too?
-#     return manifest.get("depends",[])
+def moduledependencies(path):
+    '''
+    Return dependencies of the module in path.
+
+    Parameters
+    ==========
+    path : str
+        Path of module.
+
+    Returns
+    =======
+    dict :
+        The manifest dictionary.
+    '''
+    manifest = loadmanifest(os.path.join(path,"__manifest__.py")) # TODO: Add for __openerp__ too?
+    return manifest.get("depends",[])
 
 # def dependency_dictgraph(modulepaths,strict=False):
 #     '''
