@@ -12,6 +12,7 @@ Basic definitions to make Otools work.
 import configparser
 
 from dataclasses import dataclass,field
+from typing import List
 
 #%%
 
@@ -42,9 +43,9 @@ class OdooToolsHandle():
 
     # Odootools specific
     # TODO: Addons need to either contain all projects or a folder to find projects in.
-    addons : list[str] = None # Detectable addons != The ones from conf
-    addonsdirs : list[str] = field(default_factory=lambda: ["/opt/odootools/addons","/usr/share/"]) # Dirs with addons
-    addonsprefixes : list[str] = field(default_factory=lambda: ["odoo-","odooext-"]) # Optional prefixes of addons
+    addons : List[str] = None # Detectable addons != The ones from conf
+    addonsdirs : List[str] = field(default_factory=lambda: ["/opt/odootools/addons","/usr/share/"]) # Dirs with addons
+    addonsprefixes : List[str] = field(default_factory=lambda: ["odoo-","odooext-"]) # Optional prefixes of addons
 
     # Extra functionality
     backupdir : str = "/var/backups"
