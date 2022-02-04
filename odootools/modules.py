@@ -53,6 +53,7 @@ def dirismodule(dirname):
     # return any((os.path.exists(os.path.join(dirname + X) for X in ("__manifest__.py","__openerp__.py")))
     return os.path.exists(os.path.join(dirname, "__manifest__.py"))
 
+# TODO : Split to this and _get_manifest_depends(manifest_file) Reason: Easier testing, more finegrained usage
 def moduledependencies(path):
     '''
     Return dependencies of the module in path.
@@ -70,33 +71,33 @@ def moduledependencies(path):
     manifest = loadmanifest(os.path.join(path,"__manifest__.py")) # TODO: Add for __openerp__ too?
     return manifest.get("depends",[])
 
-# def dependency_dictgraph(modulepaths,strict=False):
-#     '''
-#     Return a digraph in a Dict[str]->set(str)] format.
-#
-#     Parameters
-#     ==========
-#     modulepaths : Iterable
-#         Iterable of module paths.
-#     strict : Boolean
-#         Raise an error if a path in modulepaths doesn't exist.
-#
-#     Returns
-#     =======
-#     Dict :
-#         Dictionary str->set(str) with strings being module names.
-#     '''
-#     ret = {}
-#     for path in modulepaths:
-#         if strict and not os.path.exists(path):
-#             raise FileNotFoundError("Path not found: {}".format(path))
-#         name = os.path.basename(path)
-#         depends = moduledependencies(path)
-#         if name not in ret:
-#             ret[name] = set() # Module folder name is unique key to module
-#         for d in depends:
-#             ret[name].add(d)
-#     return ret
+def dependency_dictgraph(modulepaths,strict=False):
+    '''
+    Return a digraph in a Dict[str]->set(str)] format.
+
+    Parameters
+    ==========
+    modulepaths : Iterable
+        Iterable of module paths.
+    strict : Boolean
+        Raise an error if a path in modulepaths doesn't exist.
+
+    Returns
+    =======
+    Dict :
+        Dictionary str->set(str) with strings being module names.
+    '''
+    ret = {}
+    for path in modulepaths:
+        if strict and not os.path.exists(path):
+            raise FileNotFoundError("Path not found: {}".format(path))
+        name = os.path.basename(path)
+        depends = moduledependencies(path)
+        if name not in ret:
+            ret[name] = set() # Module folder name is unique key to module
+        for d in depends:
+            ret[name].add(d)
+    return ret
 
 def _list_modules_in_dir(dirname):
     """

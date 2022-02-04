@@ -182,17 +182,35 @@ class TestFindModules(unittest.TestCase):
         ret = modules.moduledependencies(path)
         self.assertListEqual([], ret)
 
-    # def test_dependency_dictgraph_known(self):
-    #     '''
-    #     '''
-    #     raise NotImplementedError()
-    #
-    # def test_dependency_dictgraph_strict_no_missing(self):
-    #     '''
-    #     '''
-    #     raise NotImplementedError()
-    #
-    # def test_dependency_dictgraph_strict_missing(self):
-    #     '''
-    #     '''
-    #     raise NotImplementedError()
+    def test_dependency_dictgraph_known(self):
+        '''
+        '''
+        paths = [
+            "tests/graphmanifests/a",
+            "tests/graphmanifests/b",
+            "tests/graphmanifests/c",
+            "tests/graphmanifests/d-no-dependency",
+            "tests/graphmanifests/e-no-depends-key"
+        ]
+        ret = modules.dependency_dictgraph(paths)
+        expected = {'a':{"base"},'b':{'a'},'c':{'b','a'},
+                    'd-no-dependency':set(),
+                    'e-no-depends-key':set()}
+        self.assertDictEqual(expected, ret)
+    def test_dependency_dictgraph_strict_no_missing(self):
+        '''
+        '''
+        paths = [
+            "tests/graphmanifests/a",
+        ]
+        ret = modules.dependency_dictgraph(paths,strict=True)
+        expected = {'a':{"base"}}
+        self.assertDictEqual(expected, ret)
+
+    def test_dependency_dictgraph_strict_missing(self):
+        paths = [
+            "tests/graphmanifests/a",
+            "this-path-is-missing/b"
+        ]
+        self.assertRaises(FileNotFoundError, modules.dependency_dictgraph,
+                          paths, {'strict':True})
