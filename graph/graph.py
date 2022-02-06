@@ -16,8 +16,61 @@ from odootools import modules
 
 #%%
 
-#def module_digraph_from_paths(paths,excludepaths=None,strict=True,exclude="flatten"):
-#    ''''''
+_VALIDEXCLUDEOPTIONS = ('exclude',"flatten","addon")
+def module_digraph_from_paths(paths, excludepaths=None, strict=True, 
+                              exclude_policy="flatten"):
+    '''
+    Load module dependencies as a Networkx DiGraph from an iterable of paths.
+    
+    Project/addons and modules are expected to be unique within the input
+    paths.
+    '''
+    if exclude_policy not in _VALIDEXCLUDEOPTIONS:
+        raise ValueError(f"Option 'exclude_policy' not in  {_VALIDEXCLUDEOPTIONS}")
+    # Exclude-policy:
+    epaths = [] if not excludepaths else excludepaths
+    exclude_replacement_map = {} # Replace 
+    exclude = set() # Total exclusion
+    for path in epaths:
+        if not os.path.exists(path):
+            if strict:
+                raise FileNotFoundError("Path not found: {}".format(path))
+            else:
+                # Ignore the missing module
+                continue
+        name = os.path.basename(path)
+        replacement = "other"
+        if exclude_policy == "flatten":
+            pass
+        elif exclude_policy == "addon":
+            # Assume project/addon name is unique
+            replacement = os.path.basename(os.path.dirname(path))
+        elif exclude_policy == "exclude":
+            exclude.add(name)
+            continue
+        exclude_replacement_map[name] = replacement
+        
+    # Build Graph
+    ret = nx.DiGraph()
+    for path in paths:
+        if not os.path.exists(path):
+            if strict:
+                raise FileNotFoundError("Path not found: {}".format(path))
+            else:
+                # Ignore the missing module
+                continue
+
+        name = os.path.basename(path)
+        depends = modules.moduledependencies(path)
+        if name not in ret:
+            ret.add_node(name) # Module folder name is unique key to module
+        
+        # Dependency filters:
+        dfilter = filter(lambda d: d not in exclude, depends)
+        ret.add_edges_from(
+            ( (name, exclude_replacement_map.get(d,d)) for d in dfilter ) )
+    return ret
+    
 
 _VALIDCOREOPTIONS = ("include",'exclude',"flatten")
 def module_digraph(othandle,strict=True,core="include"):

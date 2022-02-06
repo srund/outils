@@ -15,6 +15,8 @@ import networkx as nx
 # Note non-relative import. The unittest module will take care of import from
 # project root
 from odootools import config
+from odootools import modules
+
 from graph import graph
 
 #%%
@@ -76,6 +78,24 @@ class TestGraph(unittest.TestCase):
         dg = self.init_dummy_graph_01_no_core()
         dg.add_edge("a","core")
         return dg    
+
+    def init_dummy_graph_04_flatten_exclude_list(self):
+        '''
+        Dummy graph as represented by the graphmanifest test files.
+        Including core
+        '''
+        dg = self.init_dummy_graph_01_no_core()
+        dg.add_edge("a","other")
+        return dg
+    
+    def init_dummy_graph_05_addon_exclude_list(self):
+        '''
+        Dummy graph as represented by the graphmanifest test files.
+        Including core
+        '''
+        dg = self.init_dummy_graph_01_no_core()
+        dg.add_edge("a","addons") # Core module base sit in addons folder addons
+        return dg    
     
     def test_graph_known_exclude_core(self):
         '''
@@ -96,4 +116,49 @@ class TestGraph(unittest.TestCase):
         '''
         expected = self.init_dummy_graph_03_flatten_core()
         ret = graph.module_digraph(self.handle,core="flatten")
+        self.assertDiGraphEquals(expected,ret)
+        
+    def test_module_digraph_from_paths_no_excludepaths(self):
+        '''
+        All dependencies read. Non excluded.
+        '''
+        paths = modules.listmodules(self.handle, includecore=False)
+        expected = self.init_dummy_graph_02_core()
+        ret = graph.module_digraph_from_paths(paths)
+        self.assertDiGraphEquals(expected,ret)
+
+    def test_module_digraph_from_paths_no_core_exclude(self):
+        '''
+        See if core-modules are removed from graph
+        '''
+        paths = modules.listmodules(self.handle, includecore=False)
+        exclude_paths = modules.listcoremodules(self.handle)
+        
+        expected = self.init_dummy_graph_01_no_core()
+        ret = graph.module_digraph_from_paths(paths,exclude_paths,
+                                              exclude_policy="exclude")
+        self.assertDiGraphEquals(expected,ret)
+        
+    def test_module_digraph_from_paths_no_core_flatten(self):
+        '''
+        See if core-modules are flattened to 'other'
+        '''
+        paths = modules.listmodules(self.handle, includecore=False)
+        exclude_paths = modules.listcoremodules(self.handle)
+        
+        expected = self.init_dummy_graph_04_flatten_exclude_list()
+        ret = graph.module_digraph_from_paths(paths,exclude_paths,
+                                              exclude_policy="flatten")
+        self.assertDiGraphEquals(expected,ret)
+    
+    def test_module_digraph_from_paths_no_core_addon(self):
+        '''
+        See if core-modules are flattened to their project name.
+        '''
+        paths = modules.listmodules(self.handle, includecore=False)
+        exclude_paths = modules.listcoremodules(self.handle)
+        
+        expected = self.init_dummy_graph_05_addon_exclude_list()
+        ret = graph.module_digraph_from_paths(paths,exclude_paths,
+                                              exclude_policy="addon")
         self.assertDiGraphEquals(expected,ret)
