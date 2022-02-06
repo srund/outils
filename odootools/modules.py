@@ -81,6 +81,7 @@ def dependency_dictgraph(modulepaths,strict=False):
         Iterable of module paths.
     strict : Boolean
         Raise an error if a path in modulepaths doesn't exist.
+        If False ignore missing paths.
 
     Returns
     =======
@@ -89,8 +90,13 @@ def dependency_dictgraph(modulepaths,strict=False):
     '''
     ret = {}
     for path in modulepaths:
-        if strict and not os.path.exists(path):
-            raise FileNotFoundError("Path not found: {}".format(path))
+        if not os.path.exists(path):
+            if strict:
+                raise FileNotFoundError("Path not found: {}".format(path))
+            else:
+                # Ignore the missing module
+                continue
+
         name = os.path.basename(path)
         depends = moduledependencies(path)
         if name not in ret:

@@ -22,6 +22,7 @@ TESTDIR = os.path.dirname(__file__)
 
 class TestFindModules(unittest.TestCase):
     '''
+    Tests regarding finding module files and folders.
     '''
     def setUp(self):
         '''
@@ -143,6 +144,11 @@ class TestFindModules(unittest.TestCase):
         path = "tests/testdirs/addons1/odoo-project/non-module"
         self.assertFalse(modules.dirismodule(path))
 
+
+class TestModuleRelations(unittest.TestCase):
+    '''
+    Tests regarding manifests data and module relations.
+    '''
     def test_loadmanifest_missing_field(self):
         '''
         '''
@@ -165,20 +171,20 @@ class TestFindModules(unittest.TestCase):
     def test_modulesdependencies_exists(self):
         '''
         '''
-        path = "tests/graphmanifests/a"
+        path = "tests/testgraphs/addons/a"
         ret = modules.moduledependencies(path)
         self.assertListEqual(["base"], ret)
-        path = "tests/graphmanifests/c"
+        path = "tests/testgraphs/addons/c"
         ret = modules.moduledependencies(path)
         self.assertListEqual(["b","a"], ret)
 
     def test_modulesdependencies_empty(self):
         '''
         '''
-        path = "tests/graphmanifests/d-no-dependency"
+        path = "tests/testgraphs/addons/d-no-dependency"
         ret = modules.moduledependencies(path)
         self.assertListEqual([], ret)
-        path = "tests/graphmanifests/e-no-depends-key"
+        path = "tests/testgraphs/addons/e-no-depends-key"
         ret = modules.moduledependencies(path)
         self.assertListEqual([], ret)
 
@@ -186,11 +192,11 @@ class TestFindModules(unittest.TestCase):
         '''
         '''
         paths = [
-            "tests/graphmanifests/a",
-            "tests/graphmanifests/b",
-            "tests/graphmanifests/c",
-            "tests/graphmanifests/d-no-dependency",
-            "tests/graphmanifests/e-no-depends-key"
+            "tests/testgraphs/addons/a",
+            "tests/testgraphs/addons/b",
+            "tests/testgraphs/addons/c",
+            "tests/testgraphs/addons/d-no-dependency",
+            "tests/testgraphs/addons/e-no-depends-key"
         ]
         ret = modules.dependency_dictgraph(paths)
         expected = {'a':{"base"},'b':{'a'},'c':{'b','a'},
@@ -201,7 +207,7 @@ class TestFindModules(unittest.TestCase):
         '''
         '''
         paths = [
-            "tests/graphmanifests/a",
+            "tests/testgraphs/addons/a",
         ]
         ret = modules.dependency_dictgraph(paths,strict=True)
         expected = {'a':{"base"}}
@@ -209,8 +215,17 @@ class TestFindModules(unittest.TestCase):
 
     def test_dependency_dictgraph_strict_missing(self):
         paths = [
-            "tests/graphmanifests/a",
+            "tests/testgraphs/addons/a",
             "this-path-is-missing/b"
         ]
         self.assertRaises(FileNotFoundError, modules.dependency_dictgraph,
                           paths, {'strict':True})
+
+    def test_dependency_dictgraph_missing(self):
+        paths = [
+            "tests/testgraphs/addons/a",
+            "this-path-is-missing/b"
+        ]
+        ret = modules.dependency_dictgraph(paths)
+        expected = {'a':{"base"}}
+        self.assertDictEqual(expected, ret)
