@@ -136,7 +136,7 @@ class TestGraph(unittest.TestCase):
         
         expected = self.init_dummy_graph_01_no_core()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
-                                              exclude_policy="exclude")
+                                              excludepolicy="exclude")
         self.assertDiGraphEquals(expected,ret)
         
     def test_module_digraph_from_paths_no_core_flatten(self):
@@ -148,7 +148,7 @@ class TestGraph(unittest.TestCase):
         
         expected = self.init_dummy_graph_04_flatten_exclude_list()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
-                                              exclude_policy="flatten")
+                                              excludepolicy="flatten")
         self.assertDiGraphEquals(expected,ret)
     
     def test_module_digraph_from_paths_no_core_addon(self):
@@ -160,5 +160,5 @@ class TestGraph(unittest.TestCase):
         
         expected = self.init_dummy_graph_05_addon_exclude_list()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
-                                              exclude_policy="addon")
+                                              excludepolicy="addon")
         self.assertDiGraphEquals(expected,ret)

@@ -17,19 +17,41 @@ from odootools import modules
 #%%
 
 _VALIDEXCLUDEOPTIONS = ('exclude',"flatten","addon")
-def module_digraph_from_paths(paths, excludepaths=None, strict=True, 
-                              exclude_policy="flatten"):
+def module_digraph_from_paths(paths, excludepaths=None, strict=True,
+                              excludepolicy="flatten"):
     '''
     Load module dependencies as a Networkx DiGraph from an iterable of paths.
-    
+
     Project/addons and modules are expected to be unique within the input
     paths.
+
+    TODO:   Add 'internalonly' policy or something to that effect.
+            It is cumbersome to manually add exclude paths.
+
+    Parameters
+    ==========
+    path : List[str]
+        Iterable of paths of modules as strings.
+    excludepaths : List[str]
+        Iterable of paths of modules as strings to exclude.
+        See argument excludepolicy.
+
+    excludepolicy : str
+        How to deal with excluded paths/modules.
+            exclude : Exclude module from graph.
+            flatten : Map excluded module to dummy module 'other'
+            addon   : Map excluded modules to its addon name.
+
+    Returns
+    =======
+    DiGraph :
+        A Networkx DiGraph of the module dependencies.
     '''
-    if exclude_policy not in _VALIDEXCLUDEOPTIONS:
-        raise ValueError(f"Option 'exclude_policy' not in  {_VALIDEXCLUDEOPTIONS}")
+    if excludepolicy not in _VALIDEXCLUDEOPTIONS:
+        raise ValueError(f"Option 'excludepolicy' not in  {_VALIDEXCLUDEOPTIONS}")
     # Exclude-policy:
     epaths = [] if not excludepaths else excludepaths
-    exclude_replacement_map = {} # Replace 
+    exclude_replacement_map = {} # Replace
     exclude = set() # Total exclusion
     for path in epaths:
         if not os.path.exists(path):
@@ -40,16 +62,16 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
                 continue
         name = os.path.basename(path)
         replacement = "other"
-        if exclude_policy == "flatten":
-            pass
-        elif exclude_policy == "addon":
+        if excludepolicy == "flatten":
+            pass  # Use default replacement value
+        elif excludepolicy == "addon":
             # Assume project/addon name is unique
             replacement = os.path.basename(os.path.dirname(path))
-        elif exclude_policy == "exclude":
+        elif excludepolicy == "exclude":
             exclude.add(name)
             continue
         exclude_replacement_map[name] = replacement
-        
+
     # Build Graph
     ret = nx.DiGraph()
     for path in paths:
@@ -64,13 +86,13 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
         depends = modules.moduledependencies(path)
         if name not in ret:
             ret.add_node(name) # Module folder name is unique key to module
-        
+
         # Dependency filters:
         dfilter = filter(lambda d: d not in exclude, depends)
         ret.add_edges_from(
             ( (name, exclude_replacement_map.get(d,d)) for d in dfilter ) )
     return ret
-    
+
 
 _VALIDCOREOPTIONS = ("include",'exclude',"flatten")
 def module_digraph(othandle,strict=True,core="include"):
@@ -136,6 +158,5 @@ def module_digraph(othandle,strict=True,core="include"):
                         raise ValueError(
                            f"Dependency from core detected: {name}->{d}")
                     dg.add_edge(name,d)
-            
+
     return dg
-    

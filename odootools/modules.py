@@ -66,7 +66,7 @@ def moduledependencies(path):
     Returns
     =======
     dict :
-        The manifest dictionary.
+        The manifest dictionary entry 'depends'
     '''
     manifest = loadmanifest(os.path.join(path,"__manifest__.py")) # TODO: Add for __openerp__ too?
     return manifest.get("depends",[])
