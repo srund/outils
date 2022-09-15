@@ -18,7 +18,9 @@ from odootools import modules
 
 _VALIDEXCLUDEOPTIONS = ('exclude',"flatten","addon")
 def module_digraph_from_paths(paths, excludepaths=None, strict=True,
-                              excludepolicy="flatten"):
+                              excludepolicy="flatten",
+                              #annotate=True
+                              ):
     '''
     Load module dependencies as a Networkx DiGraph from an iterable of paths.
 
@@ -39,7 +41,7 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
     excludepolicy : str
         How to deal with excluded paths/modules.
             exclude : Exclude module from graph.
-            flatten : Map excluded module to dummy module 'other'
+            flatten : Map excluded module to dummy module '_other'
             addon   : Map excluded modules to its addon name.
 
     Returns
@@ -49,6 +51,17 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
     '''
     if excludepolicy not in _VALIDEXCLUDEOPTIONS:
         raise ValueError(f"Option 'excludepolicy' not in  {_VALIDEXCLUDEOPTIONS}")
+
+    namepath_map = {}
+    for path in paths:
+        if not os.path.exists(path):
+            if strict:
+                raise FileNotFoundError("Path not found: {}".format(path))
+            else:
+                # Ignore the missing module
+                continue
+        namepath_map[os.path.basename(path)] = path
+
     # Exclude-policy:
     epaths = [] if not excludepaths else excludepaths
     exclude_replacement_map = {} # Replace
@@ -61,7 +74,7 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
                 # Ignore the missing module
                 continue
         name = os.path.basename(path)
-        replacement = "other"
+        replacement = "_other"
         if excludepolicy == "flatten":
             pass  # Use default replacement value
         elif excludepolicy == "addon":
@@ -74,15 +87,7 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
 
     # Build Graph
     ret = nx.DiGraph()
-    for path in paths:
-        if not os.path.exists(path):
-            if strict:
-                raise FileNotFoundError("Path not found: {}".format(path))
-            else:
-                # Ignore the missing module
-                continue
-
-        name = os.path.basename(path)
+    for name,path in namepath_map.items():
         depends = modules.moduledependencies(path)
         if name not in ret:
             ret.add_node(name) # Module folder name is unique key to module
