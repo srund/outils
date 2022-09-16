@@ -19,7 +19,7 @@ from odootools import modules
 _VALIDEXCLUDEOPTIONS = ('exclude',"flatten","addon")
 def module_digraph_from_paths(paths, excludepaths=None, strict=True,
                               excludepolicy="flatten",
-                              #annotate=True
+                              annotate=True
                               ):
     '''
     Load module dependencies as a Networkx DiGraph from an iterable of paths.
@@ -43,6 +43,10 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
             exclude : Exclude module from graph.
             flatten : Map excluded module to dummy module '_other'
             addon   : Map excluded modules to its addon name.
+
+    annotate : boolean
+        Annotate nodes and edges with extra information.
+        Replaced notes are annotated with the replacement policy.
 
     Returns
     =======
@@ -93,15 +97,29 @@ def module_digraph_from_paths(paths, excludepaths=None, strict=True,
             ret.add_node(name) # Module folder name is unique key to module
 
         # Dependency filters:
-        dfilter = filter(lambda d: d not in exclude, depends)
+        dfiltered = tuple(filter(lambda d: d not in exclude, depends))
         ret.add_edges_from(
-            ( (name, exclude_replacement_map.get(d,d)) for d in dfilter ) )
+            ((name, exclude_replacement_map.get(d, d)) for d in dfiltered))
+
+        # Annotation
+        # annotation can provide information as to why an item has been
+        # replaced or can be used to add for example dot-langauge attributes
+        # to a node or edge later.
+        annotate_key = "excludepolicy"
+        if annotate:
+            # Add excludepolicy to replaced nodes.
+            for d in dfiltered:
+                if d in exclude_replacement_map:
+                    ret.nodes[exclude_replacement_map[d]][annotate_key]= excludepolicy
+
     return ret
 
 
 _VALIDCOREOPTIONS = ("include",'exclude',"flatten")
 def module_digraph(othandle,strict=True,core="include"):
     '''
+    TODO: Write tests
+
     Load module dependencies as a Networkx DiGraph from an OdooToolsHandle.
 
     Parameters

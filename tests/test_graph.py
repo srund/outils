@@ -5,7 +5,7 @@ Created on Sat Feb  5 14:01:50 2022
 
 @author: Simon Rundstedt
 """
-#%% 
+#%%
 import unittest
 
 import os
@@ -44,7 +44,7 @@ class TestGraph(unittest.TestCase):
         '''
         '''
         self.handle = config.load(os.path.join(TESTDIR,
-                                               'test_handle_graph.ini'))      
+                                               'test_handle_graph.ini'))
     def init_dummy_graph_01_no_core(self):
         '''
         Dummy graph as represented by the graphmanifest test files.
@@ -77,7 +77,7 @@ class TestGraph(unittest.TestCase):
         '''
         dg = self.init_dummy_graph_01_no_core()
         dg.add_edge("a","core")
-        return dg    
+        return dg
 
     def init_dummy_graph_04_flatten_exclude_list(self):
         '''
@@ -85,9 +85,9 @@ class TestGraph(unittest.TestCase):
         Including core
         '''
         dg = self.init_dummy_graph_01_no_core()
-        dg.add_edge("a","other")
+        dg.add_edge("a","_other")
         return dg
-    
+
     def init_dummy_graph_05_addon_exclude_list(self):
         '''
         Dummy graph as represented by the graphmanifest test files.
@@ -95,8 +95,8 @@ class TestGraph(unittest.TestCase):
         '''
         dg = self.init_dummy_graph_01_no_core()
         dg.add_edge("a","addons") # Core module base sit in addons folder addons
-        return dg    
-    
+        return dg
+
     def test_graph_known_exclude_core(self):
         '''
         '''
@@ -117,7 +117,7 @@ class TestGraph(unittest.TestCase):
         expected = self.init_dummy_graph_03_flatten_core()
         ret = graph.module_digraph(self.handle,core="flatten")
         self.assertDiGraphEquals(expected,ret)
-        
+
     def test_module_digraph_from_paths_no_excludepaths(self):
         '''
         All dependencies read. Non excluded.
@@ -133,32 +133,45 @@ class TestGraph(unittest.TestCase):
         '''
         paths = modules.listmodules(self.handle, includecore=False)
         exclude_paths = modules.listcoremodules(self.handle)
-        
+
         expected = self.init_dummy_graph_01_no_core()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
                                               excludepolicy="exclude")
         self.assertDiGraphEquals(expected,ret)
-        
+
     def test_module_digraph_from_paths_no_core_flatten(self):
         '''
         See if core-modules are flattened to 'other'
         '''
         paths = modules.listmodules(self.handle, includecore=False)
         exclude_paths = modules.listcoremodules(self.handle)
-        
+
         expected = self.init_dummy_graph_04_flatten_exclude_list()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
                                               excludepolicy="flatten")
         self.assertDiGraphEquals(expected,ret)
-    
+
     def test_module_digraph_from_paths_no_core_addon(self):
         '''
         See if core-modules are flattened to their project name.
         '''
         paths = modules.listmodules(self.handle, includecore=False)
         exclude_paths = modules.listcoremodules(self.handle)
-        
+
         expected = self.init_dummy_graph_05_addon_exclude_list()
         ret = graph.module_digraph_from_paths(paths,exclude_paths,
                                               excludepolicy="addon")
-        self.assertDiGraphEquals(expected,ret)
+        self.assertDiGraphEquals(expected, ret)
+
+    def test_module_digraph_from_paths_annotation(self):
+        '''
+        See if replaced nodes are annotated appropriately.
+        '''
+        annotate_key = "excludepolicy"
+        paths = modules.listmodules(self.handle, includecore=False)
+        exclude_paths = modules.listcoremodules(self.handle)
+
+        ret = graph.module_digraph_from_paths(paths,exclude_paths,
+                                              excludepolicy="addon",
+                                              annotate=True)
+        self.assertEqual("addon", ret.nodes["addons"][annotate_key])
