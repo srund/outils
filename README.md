@@ -1,4 +1,5 @@
 # outils
+
 Utilities to help manage an Odoo installation
 
 The general state of this project is very much "Work in progess.".
@@ -16,30 +17,30 @@ manifests with the wrong values.
 
 #### odootools
 
-    `odootools` provides base functionality for the rest of the modules within
-    this project.
+`odootools` provides base functionality for the rest of the modules within
+this project.
 
-    The `odootools` modules is expected to consist of file/system related
-    operations. Odoo, other programs such as Postgresql or non standard
-    Python-modules (including `odoo`) are not expected to be installed.
+The `odootools` modules is expected to consist of file/system related
+operations. Odoo, other programs such as Postgresql or non standard
+Python-modules (including `odoo`) are not expected to be installed.
 
-    The OdooToolsHandle contain references to an Odoo-installation, by default
-    assumed to be the nightly deb-package.
-    Functionality that reference an Odoo installation such as including core
-    modules should be able to run in an Odoo-free environment using the
-    appropriate arguments.
+The OdooToolsHandle contain references to an Odoo-installation, by default
+assumed to be the nightly deb-package.
+Functionality that reference an Odoo installation such as including core
+modules should be able to run in an Odoo-free environment using the
+appropriate arguments.
 
-    A possible and valid use case should be unzipping a set of odoo modules
-    on a computer without Odoo installed and start querying the folder for
-    information.
+A possible and valid use case should be unzipping a set of odoo modules
+on a computer without Odoo installed and start querying the folder for
+information.
 
 #### graph
 
-    This modules provides functionality from the `networkx` modue.
+This modules provides functionality from the `networkx` modue.
 
-    Networkx is expected to be installed. Other than that the same assumptions
-    as `odootools` apply. This might change in the future as it is useful to
-    construct DiGraphs from individual Odoo databases.
+Networkx is expected to be installed. Other than that the same assumptions
+as `odootools` apply. This might change in the future as it is useful to
+construct DiGraphs from individual Odoo databases.
 
 #### db
 
@@ -67,4 +68,13 @@ To include code coverage install the `coverage` module and run:
 ```
 python3 -m coverage run --source=. -m unittest discover .
 python3 -m coverage report
+```
+Coverage include many options to define what files should be included in report.
+Please consult the coverage [documentation](https://coverage.readthedocs.io/en/6.1.2/source.html)
+for more info. A few examples below:
+```
+# Only track files in the odootools folder
+python3 -m coverage run --source=odootools -m unittest discover .
+# Omit files in the folder cli from the report:
+python3 -m coverage run --source=. --omit=cli/* -m unittest discover .
 ```
