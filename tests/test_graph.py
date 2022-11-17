@@ -118,6 +118,31 @@ class TestGraph(unittest.TestCase):
         ret = graph.module_digraph(self.handle,core="flatten")
         self.assertDiGraphEquals(expected,ret)
 
+    def test_module_digraph_from_paths_invalid_policy(self):
+        '''
+        Test Exception on invalid exclude policy.
+        '''
+        args = (modules.listmodules(self.handle, includecore=False),)
+        kwargs = {"excludepolicy":"not-a-policy"}
+        self.assertRaises(ValueError, graph.module_digraph_from_paths, *args, **kwargs)
+
+    def test_module_digraph_from_paths_strict_error_path(self):
+        '''
+        Raise exception while strict and path not exists.
+        '''
+        args = ("this/path/doesnt/exist/at/all",)
+        kwargs = {"strict":True}
+        self.assertRaises(FileNotFoundError, graph.module_digraph_from_paths, *args, **kwargs)
+
+    def test_module_digraph_from_paths_strict_error_epath(self):
+        '''
+        Raise exception while strict and excludepath not exists.
+        '''
+        args = (modules.listmodules(self.handle, includecore=False),)
+        epath = ("this/path/doesnt/exist/at/all",)
+        kwargs = {"strict":True, "excludepaths":epath}
+        self.assertRaises(FileNotFoundError, graph.module_digraph_from_paths, *args, **kwargs)
+
     def test_module_digraph_from_paths_no_excludepaths(self):
         '''
         All dependencies read. Non excluded.
@@ -126,6 +151,16 @@ class TestGraph(unittest.TestCase):
         expected = self.init_dummy_graph_02_core()
         ret = graph.module_digraph_from_paths(paths)
         self.assertDiGraphEquals(expected,ret)
+
+    def test_module_digraph_from_paths_no_strict(self):
+        '''
+        Avoid raising exception while not strict and path not exists.
+        '''
+        non_existing = ["this/path/doesnt/exist/at/all"]
+        paths = non_existing + modules.listmodules(self.handle, includecore=False)
+        expected = self.init_dummy_graph_02_core()
+        ret = graph.module_digraph_from_paths(paths, strict=False)
+        self.assertDiGraphEquals(expected, ret)
 
     def test_module_digraph_from_paths_no_core_exclude(self):
         '''

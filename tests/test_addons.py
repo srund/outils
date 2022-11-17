@@ -76,3 +76,10 @@ class TestFindAddons(unittest.TestCase):
         '''
         self.handle.addonsdirs = ["tests/testdirs/addons3"]
         self.assertListEqual([],addons.listaddons(self.handle))
+
+    def test_list_file_not_found(self):
+        '''
+        Test raising of FileNotFoundError on file not found.
+        '''
+        self.handle.addonsdirs = ["this/path/doesnt/exist/except/if/the/user/is/weird"]
+        self.assertRaises(FileNotFoundError, addons.listaddons, self.handle)
